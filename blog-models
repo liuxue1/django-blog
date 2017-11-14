@@ -1,0 +1,59 @@
+from django.db import models
+
+# Create your models here.
+
+class Article(models.Model):
+    title = models.CharField('Title',max_length = 220)
+    context = models.TextField('Context')
+    #Record the first time it is created, it will not be overwritten
+    create_time = models.DateTimeField('Create Time',auto_now_add = True)
+    #Each time you save an object, the field is automatically set to the current time, the timestamp for the last modification
+    modify_time = models.DateTimeField('Last Modified Time',auto_now = True)
+    #summary this is optional if null then show the context of money 54 charcater
+    summary = models.CharField('Summary',max_length = 50,null = True,blank = True,
+                               help_text = 'Optional,if the empty then extract the context of money 50 character')
+    #Viewed this article times
+    views = models.PositiveIntegerField('Views',default = 0)
+    #Like the number of times
+    likes = models.PositiveIntegerField('Like',default = 0)
+    #Category one article only to one category,but one category may be to many article
+    category = models.ForeignKey('Category',null = True,verbose_name = "Article's Category",on_delete = models.SET_NULL)
+    #This is article's lables ,they are many to many relastionship
+    lables = models.ManyToManyField('Tag',verbose_name = "Article's Tag")
+    #display objects.all() display Article.title
+    def __str__(self):
+        return self.title
+    class Meta:
+        ordering = ['-modify_time']
+
+class Category(models.Model):
+    '''this is save article category .this is article foreign key'''
+    #Category name
+    name = models.CharField('Category name',max_length = 20)
+    #Create category time it is auto create time
+    create_time = models.DateTimeField('Create time',auto_now_add = True)
+    #Last modified time
+    update_time = models.DateTimeField('Last modify time',auto_now = True)
+    def __str__(self):
+        return self.name
+
+class Comment(models.Model):
+    '''This is article's comment'''
+    content = models.CharField('Comment content',max_length = 200)
+    # submit time this is not modified,as long as submit comment on creating time now.
+    submit_time = models.DateTimeField('submit time',auto_now_add = True)
+    #Commented article ,one commented  only to one article, one article may be many commented.
+    article = models.ForeignKey('Article',verbose_name = "comment's article",on_delete = models.CASCADE)
+    #comment author
+    author = models.CharField('comment author',max_length = 20)
+    #define funtions used to display Comment.object.all().
+    def __str__(self):
+        return self.content
+
+class Tag(models.Model):
+    '''This is showing lables for article.'''
+    name = models.CharField('Tag ',max_length = 10)
+    create_time = models.DateTimeField('Create tag time',auto_now_add = True)
+    modify_time = models.DateTimeField('modify tag time',auto_now = True)
+    def __str__(self):
+        return self.name
